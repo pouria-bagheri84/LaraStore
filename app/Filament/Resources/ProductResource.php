@@ -10,19 +10,25 @@ use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Pages\SubNavigationPosition;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-s-queue-list';
+
+    protected static SubNavigationPosition $subNavigationPosition = SubNavigationPosition::End;
 
     public static function form(Form $form): Form
     {
@@ -92,17 +98,25 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\SpatieMediaLibraryImageColumn::make('images')
+                    ->collection('images')
+                    ->limit(1)
+                    ->label('Image')
+                    ->conversion('thumb'),
+
                 TextColumn::make('title')
                     ->sortable()
                     ->words(10)
                     ->searchable(),
+
                 TextColumn::make('status')
                     ->badge()
                     ->colors(ProductStatusEnum::colors()),
+
                 TextColumn::make('department.name'),
                 TextColumn::make('category.name'),
                 TextColumn::make('created_at')
-                    ->dateTime()
+                    ->dateTime(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
@@ -133,6 +147,15 @@ class ProductResource extends Resource
             'index' => Pages\ListProducts::route('/'),
             'create' => Pages\CreateProduct::route('/create'),
             'edit' => Pages\EditProduct::route('/{record}/edit'),
+            'images' => Pages\ProductImages::route('/{record}/images'),
         ];
+    }
+
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        return $page->generateNavigationItems([
+            Pages\EditProduct::class,
+            Pages\ProductImages::class,
+        ]);
     }
 }
