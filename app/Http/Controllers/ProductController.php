@@ -13,7 +13,7 @@ class ProductController extends Controller
     public function home(): \Inertia\Response
     {
         $products = Product::query()
-            ->published()
+            ->forWebsite()
             ->paginate(12);
 
         return Inertia::render('Home', [
