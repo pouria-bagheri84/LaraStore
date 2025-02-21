@@ -187,10 +187,11 @@ class CartService
     protected function updateItemQuantityInDatabase(int $productId, int $quantity, array $optionIds)
     {
         $userId = Auth::id();
-        $cartItem = CartItem::query()
+
+        $cartItem = CartItem::all()
             ->where('user_id', $userId)
             ->where('product_id', $productId)
-            ->where('variation_type_option_ids', json_encode($optionIds))
+            ->where('variation_type_option_ids', $optionIds)
             ->first();
 
         if ($cartItem) {
@@ -268,11 +269,13 @@ class CartService
         $userId = Auth::id();
         ksort($optionIds);
 
-        CartItem::query()
+        $cartItem = CartItem::all()
             ->where('user_id', $userId)
             ->where('product_id', $productId)
-            ->where('variation_type_option_ids', json_encode($optionIds))
-            ->delete();
+            ->where('variation_type_option_ids', $optionIds)
+            ->first();
+
+        $cartItem->delete();
     }
 
     protected function removeItemFromCookies(int $productId, array $optionIds)
@@ -334,6 +337,7 @@ class CartService
         $cartItems = $this->getCartItemsFromCookies();
 
         foreach ($cartItems as $itemKey => $cartItem) {
+            dd($cartItem);
             $existingCartItem = CartItem::query()
                 ->where('user_id', $userId)
                 ->where('product_id', $cartItem['product_id'])
