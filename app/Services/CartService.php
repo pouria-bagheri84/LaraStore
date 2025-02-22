@@ -337,7 +337,6 @@ class CartService
         $cartItems = $this->getCartItemsFromCookies();
 
         foreach ($cartItems as $itemKey => $cartItem) {
-            dd($cartItem);
             $existingCartItem = CartItem::query()
                 ->where('user_id', $userId)
                 ->where('product_id', $cartItem['product_id'])
