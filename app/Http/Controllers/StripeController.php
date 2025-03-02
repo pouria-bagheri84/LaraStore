@@ -50,16 +50,13 @@ class StripeController extends Controller
             ->where('stripe_session_id', $sessionId)
             ->get();
 
-        if ($orders->count() === 0) {
-            abort(404);
-        }
+
 
         foreach ($orders as $order) {
             if ($order->user_id !== $user->id){
                 abort(403);
             }
         }
-
         return Inertia::render('Stripe/Failure', [
             'orders' => OrderViewResource::collection($orders)->collection->toArray(),
         ]);
@@ -86,7 +83,6 @@ class StripeController extends Controller
             Log::error($e);
             return response('Invalid payload', 400);
         }
-
 
         // Handle Event
         switch ($event->type) {
@@ -174,5 +170,18 @@ class StripeController extends Controller
                 echo "Received unknown event type: " . $event->type;
         }
         return response('', 200);
+    }
+
+    public function connect()
+    {
+        if (!auth()->user()->getStripeAccountId()) {
+            auth()->user()->createStripeAccount(['type' => 'express']);
+        }
+
+        if (!auth()->user()->isStripeAccountActive()) {
+            return redirect(auth()->user()->getStripeAccountLink());
+        }
+
+        return back()->with('success', 'Your account is already connected.');
     }
 }

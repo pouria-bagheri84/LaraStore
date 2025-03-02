@@ -2,7 +2,7 @@ import React from 'react';
 import {Link, usePage} from "@inertiajs/react";
 import MiniCartDropdown from "@/Components/App/MiniCartDropdown";
 
-function Navbar(props) {
+function Navbar() {
     const {auth, totalQuantity, totalPrice} = usePage().props;
     const {user} = auth;
     return (

@@ -39,7 +39,7 @@ function CartItem({item}: {item: CartItemType}) {
         <>
             <div key={item.id} className={'flex gap-6 p-3'}>
                 <Link href={productRoutes(item)}
-                      className={'w-32 min-w-32 min-h-32 flex justify-center self-start'}
+                      className={'w-32 min-w-16 sm:min-w-32 min-h-16 sm:min-h-32 flex justify-center self-start'}
                 >
                     <img src={item.image} alt="" className={'max-h-full max-w-full'}/>
                 </Link>
