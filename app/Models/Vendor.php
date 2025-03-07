@@ -12,7 +12,9 @@ class Vendor extends Model
 
     public function scopeEligibleForPayout(Builder $query)
     {
-        return $query->where('status', VendorStatusEnum::APPROVED->value);
+        return $query->where('status', VendorStatusEnum::APPROVED->value)
+            ->join('users', 'users.id', '=', 'vendors.user_id')
+            ->where('users.stripe_account_active', true);
     }
 
     public function user()
