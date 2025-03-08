@@ -49,6 +49,7 @@ export type Product = {
     user: {
         id: number;
         name: string;
+        store_name: string;
     };
     department: {
         id: number;
@@ -131,4 +132,10 @@ export type Order = {
         store_address: string;
     };
     orderItems: OrderItem[]
+}
+
+export type Vendor = {
+    id: number;
+    store_name: string;
+    store_address: string;
 }

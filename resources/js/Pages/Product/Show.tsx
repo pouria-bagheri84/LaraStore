@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {Product, VariationTypeOption} from "@/types";
-import {Head, router, useForm, usePage} from "@inertiajs/react";
+import {Head, Link, router, useForm, usePage} from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import Carousel from "@/Components/Core/Carousel";
 import CurrencyFormatter from "@/Components/Core/CurrencyFormatter";
@@ -188,7 +188,13 @@ function Show({ product, variationOptions }: { product: Product, variationOption
                         <Carousel images={images}/>
                     </div>
                     <div className="col-span-5">
-                        <h1 className="text-2xl mb-8">{product.title}</h1>
+                        <h1 className="text-2xl">{product.title}</h1>
+
+                        <p className={'mb-8'}>
+                            by <Link href={route('vendor.profile', product.user.store_name)}
+                                     className={'hover:underline'}>{product.user.name}</Link>&nbsp;
+                            in <Link href={'/'} className={'hover:underline'}>{product.department.name}</Link>
+                        </p>
 
                         <div>
                             <div className="text-3xl font-semibold">
