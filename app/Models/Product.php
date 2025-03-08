@@ -6,10 +6,12 @@ use App\Enums\ProductStatusEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\MediaCollection;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class Product extends Model implements HasMedia
@@ -63,6 +65,18 @@ class Product extends Model implements HasMedia
         return $this->hasMany(VariationType::class);
     }
 
+    public function options(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            VariationTypeOption::class, // Target Model
+            VariationType::class, // Intermediate Model
+            'product_id', // Foreign Key on VariationType Table
+            'variation_type_id', // Foreign Key on Option Table
+            'id', // Local Key on Product Table
+            'id' // Local Key on VariationType Table
+        );
+    }
+
     public function variations(): HasMany
     {
         return $this->hasMany(ProductVariation::class, 'product_id');
@@ -99,5 +113,49 @@ class Product extends Model implements HasMedia
             }
         }
         return $this->getFirstMediaUrl('images', 'small');
+    }
+
+    public function getPriceForFirstOptions(): float
+    {
+        $firstOptions = $this->getFirstOptionsMap();
+
+        if ($firstOptions){
+            return $this->getPriceForOptions($firstOptions);
+        }
+        return $this->price;
+    }
+
+    public function getFirstImageUrl($collectionName = 'images', $conversion = 'small'): string
+    {
+        if ($this->options->count() > 0){
+            foreach ($this->options as $option) {
+                $imageUrl = $option->getFirstMediaUrl($collectionName, $conversion);
+                if ($imageUrl) {
+                    return $imageUrl;
+                }
+            }
+        }
+        return $this->getFirstMediaUrl($collectionName, $conversion);
+    }
+
+    public function getImages(): \Spatie\MediaLibrary\MediaCollections\Models\Collections\MediaCollection
+    {
+        if ($this->options->count() > 0){
+            foreach ($this->options as $option) {
+                /** @var VariationTypeOption $option */
+                $images = $option->getMedia('images');
+                if ($images){
+                    return $images;
+                }
+            }
+        }
+        return $this->getMedia('images');
+    }
+
+    public function getFirstOptionsMap(): array
+    {
+        return $this->variationTypes
+            ->mapWithKeys(fn($type) => [$type->id => $type->options[0]?->id])
+            ->toArray();
     }
 }
