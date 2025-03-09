@@ -10,13 +10,22 @@ use App\Models\Vendor;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class VendorController extends Controller
 {
-    public function profile(Vendor $vendor)
+    public function profile(Request $request, Vendor $vendor): Response
     {
+        $keyword = $request->query('keyword');
+
         $products = Product::query()
             ->forWebsite()
+            ->when($keyword, function ($query, $keyword) {
+                $query->where(function ($query) use ($keyword) {
+                    $query->where('title', 'LIKE', "%{$keyword}%")
+                        ->orWhere('description', 'LIKE', "%{$keyword}%");
+                });
+            })
             ->where('created_by', $vendor->user_id)
             ->paginate();
 
