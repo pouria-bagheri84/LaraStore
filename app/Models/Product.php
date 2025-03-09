@@ -122,6 +122,23 @@ class Product extends Model implements HasMedia
         return $this->getFirstMediaUrl('images', 'small');
     }
 
+    public function getImagesForOptions(array $optionIds = null)
+    {
+        if ($optionIds){
+            $optionIds = array_values($optionIds);
+            $options = VariationTypeOption::query()->whereIn('id', $optionIds)->get();
+
+            foreach ($options as $option) {
+                $image = $option->getMedia('images');
+                if ($image) {
+                    return $image;
+                }
+            }
+        }
+
+        return $this->getMedia('images');
+    }
+
     public function getPriceForFirstOptions(): float
     {
         $firstOptions = $this->getFirstOptionsMap();
